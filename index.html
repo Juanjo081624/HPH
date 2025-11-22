@@ -191,10 +191,7 @@
 
     .fab {
       position: fixed;
-      right: 16px;
       bottom: 16px;
-      background: var(--amarillo-cua);
-      color: #000;
       border-radius: 999px;
       padding: 10px 18px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.25);
@@ -202,6 +199,18 @@
       cursor: pointer;
       border: none;
       font-size: 0.9rem;
+    }
+
+    #btnPDF {
+      right: 16px;
+      background: var(--amarillo-cua);
+      color: #000;
+    }
+
+    #btnNew {
+      right: 150px;
+      background: #ccc;
+      color: #000;
     }
 
     .status {
@@ -259,10 +268,6 @@
         <label>Clave de activación</label>
         <input type="text" id="claveActivacion">
       </div>
-      <div>
-        <label>Lugar del evento</label>
-        <input type="text" id="lugarEvento">
-      </div>
     </div>
   </section>
 
@@ -294,17 +299,23 @@
         <label>Teléfono</label>
         <input type="text" id="pacTelefono">
       </div>
+
       <div>
         <label>Dirección del evento</label>
         <input type="text" id="pacDirEvento">
       </div>
       <div>
+        <label>Comuna evento</label>
+        <input type="text" id="pacComunaEvento">
+      </div>
+
+      <div>
         <label>Dirección de destino</label>
         <input type="text" id="pacDirDestino">
       </div>
       <div>
-        <label>Comuna</label>
-        <input type="text" id="pacComuna">
+        <label>Comuna destino</label>
+        <input type="text" id="pacComunaDestino">
       </div>
     </div>
   </section>
@@ -395,16 +406,6 @@
       <div>
         <label>Total</label>
         <input type="number" id="gTotal" readonly>
-      </div>
-    </div>
-    <div class="grid" style="margin-top:8px;">
-      <div>
-        <label>Glasgow inicial (total)</label>
-        <input type="number" id="gInicial">
-      </div>
-      <div>
-        <label>Glasgow final (total)</label>
-        <input type="number" id="gFinal">
       </div>
     </div>
   </section>
@@ -512,6 +513,7 @@
   </section>
 </main>
 
+<button class="fab" id="btnNew">Nueva ficha</button>
 <button class="fab" id="btnPDF">Generar PDF</button>
 <div class="status" id="statusMsg">PDF generado</div>
 
@@ -569,6 +571,12 @@
     tablaMedBody.appendChild(tr);
   });
 
+  // Botón Nueva ficha
+  document.getElementById('btnNew').addEventListener('click', () => {
+    if (!confirm('¿Crear nueva ficha y borrar todos los datos actuales?')) return;
+    location.reload();
+  });
+
   // Armar objeto con todos los datos
   function gatherData() {
     // Signos vitales
@@ -613,8 +621,7 @@
         fichaClinica: document.getElementById('fichaClinica').value,
         movil: document.getElementById('movil').value,
         complejidad: document.getElementById('complejidad').value,
-        claveActivacion: document.getElementById('claveActivacion').value,
-        lugarEvento: document.getElementById('lugarEvento').value
+        claveActivacion: document.getElementById('claveActivacion').value
       },
       paciente: {
         nombre: document.getElementById('pacNombre').value,
@@ -624,8 +631,9 @@
         prevision: document.getElementById('pacPrevision').value,
         telefono: document.getElementById('pacTelefono').value,
         direccionEvento: document.getElementById('pacDirEvento').value,
+        comunaEvento: document.getElementById('pacComunaEvento').value,
         direccionDestino: document.getElementById('pacDirDestino').value,
-        comuna: document.getElementById('pacComuna').value
+        comunaDestino: document.getElementById('pacComunaDestino').value
       },
       antecedentes: {
         morbid: document.getElementById('antMorbid').value,
@@ -638,12 +646,6 @@
         alientoEtilicoDetalle: document.getElementById('ohDetalle').value
       },
       historiaClinica: document.getElementById('historiaClinica').value,
-      glasgowInicial: {
-        total: document.getElementById('gInicial').value
-      },
-      glasgowFinal: {
-        total: document.getElementById('gFinal').value
-      },
       glasgowActual: {
         ocular: document.getElementById('gOcular').value,
         verbal: document.getElementById('gVerbal').value,
@@ -680,7 +682,7 @@
     };
   }
 
-  // Generar PDF (layout básico, luego se puede afinar para parecerse 100% al papel)
+  // Generar PDF
   document.getElementById('btnPDF').addEventListener('click', () => {
     const data = gatherData();
     const { jsPDF } = window.jspdf;
@@ -709,8 +711,6 @@
     y += 5;
     doc.text(`Complejidad: ${data.evento.complejidad || ''}`, 10, y);
     doc.text(`Clave de activación: ${data.evento.claveActivacion || ''}`, 80, y);
-    y += 5;
-    doc.text(`Lugar del evento: ${data.evento.lugarEvento || ''}`, 10, y);
     y += 7;
 
     // Datos paciente
@@ -726,10 +726,12 @@
     doc.text(`Teléfono: ${data.paciente.telefono || ''}`, 10, y);
     y += 5;
     doc.text(`Dirección evento: ${data.paciente.direccionEvento || ''}`, 10, y);
-    y += 5;
+    y += 4;
+    doc.text(`Comuna evento: ${data.paciente.comunaEvento || ''}`, 10, y);
+    y += 4;
     doc.text(`Dirección destino: ${data.paciente.direccionDestino || ''}`, 10, y);
-    y += 5;
-    doc.text(`Comuna: ${data.paciente.comuna || ''}`, 10, y);
+    y += 4;
+    doc.text(`Comuna destino: ${data.paciente.comunaDestino || ''}`, 10, y);
     y += 7;
 
     // Antecedentes
@@ -754,13 +756,14 @@
     y += histLines.length * 4 + 3;
 
     // Glasgow
-    doc.text(`Glasgow actual (O/V/M/Total): ${data.glasgowActual.ocular || '-'} / ${data.glasgowActual.verbal || '-'} / ${data.glasgowActual.motora || '-'} / ${data.glasgowActual.total || '-'}`, 10, y);
-    y += 4;
-    doc.text(`Glasgow inicial: ${data.glasgowInicial.total || '-'}`, 10, y);
-    doc.text(`Glasgow final: ${data.glasgowFinal.total || '-'}`, 80, y);
+    doc.text(
+      `Glasgow actual (O/V/M/Total): ${data.glasgowActual.ocular || '-'} / ${data.glasgowActual.verbal || '-'} / ${data.glasgowActual.motora || '-'} / ${data.glasgowActual.total || '-'}`,
+      10,
+      y
+    );
     y += 7;
 
-    // Signos vitales (solo primeras filas por tema de espacio)
+    // Signos vitales (resumen)
     doc.text('Signos vitales (resumen)', 10, y);
     y += 4;
     let countSV = 0;
