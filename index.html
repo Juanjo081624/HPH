@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro Unidad de Rescate CUA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- jsPDF para generar PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --azul-cua: #0b1e3f;
+      --amarillo-cua: #e5ff00;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      background: #f2f3f7;
+      color: #111;
+    }
+
+    header {
+      background: var(--azul-cua);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    header span {
+      background: var(--amarillo-cua);
+      color: #000;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    main {
+      padding: 12px;
+      max-width: 900px;
+      margin: 0 auto 80px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--azul-cua);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="time"],
+    textarea,
+    select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 0.85rem;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .row {
+      margin-bottom: 8px;
+    }
+
+    .inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .inline label {
+      margin: 0;
+    }
+
+    .chip-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #f9f9f9;
+    }
+
+    .chip.selected {
+      background: var(--amarillo-cua);
+      border-color: var(--azul-cua);
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 4px;
+      text-align: center;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn-primary {
+      background: var(--azul-cua);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #eee;
+      color: #111;
+    }
+
+    .btn-small {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+
+    .procedimientos-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 4px 12px;
+    }
+
+    .procedimientos-list label {
+      font-weight: 400;
+      font-size: 0.8rem;
+    }
+
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      background: var(--amarillo-cua);
+      color: #000;
+      border-radius: 999px;
+      padding: 10px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-size: 0.9rem;
+    }
+
+    .status {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      background: #111;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .status.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Registro Unidad de Rescate</h1>
+  <span>Rescate CUA</span>
+</header>
+
+<main>
+  <!-- DATOS DEL EVENTO -->
+  <section class="card">
+    <h2>Datos del evento</h2>
+    <div class="grid">
+      <div>
+        <label>Fecha</label>
+        <input type="text" id="fecha">
+      </div>
+      <div>
+        <label>Ficha clínica</label>
+        <input type="text" id="fichaClinica">
+      </div>
+      <div>
+        <label>Móvil</label>
+        <input type="text" id="movil">
+      </div>
+      <div>
+        <label>Complejidad</label>
+        <div class="chip-group" id="complejidadChips">
+          <div class="chip" data-value="Baja">Baja</div>
+          <div class="chip" data-value="Mediana">Mediana</div>
+          <div class="chip" data-value="Alta">Alta</div>
+        </div>
+        <input type="hidden" id="complejidad">
+      </div>
+      <div>
+        <label>Clave de activación</label>
+        <input type="text" id="claveActivacion">
+      </div>
+      <div>
+        <label>Lugar del evento</label>
+        <input type="text" id="lugarEvento">
+      </div>
+    </div>
+  </section>
+
+  <!-- DATOS DEL PACIENTE -->
+  <section class="card">
+    <h2>Datos del paciente</h2>
+    <div class="grid">
+      <div>
+        <label>Nombre</label>
+        <input type="text" id="pacNombre">
+      </div>
+      <div>
+        <label>RUT</label>
+        <input type="text" id="pacRut">
+      </div>
+      <div>
+        <label>Edad</label>
+        <input type="number" id="pacEdad">
+      </div>
+      <div>
+        <label>Sexo</label>
+        <input type="text" id="pacSexo">
+      </div>
+      <div>
+        <label>Previsión</label>
+        <input type="text" id="pacPrevision">
+      </div>
+      <div>
+        <label>Teléfono</label>
+        <input type="text" id="pacTelefono">
+      </div>
+      <div>
+        <label>Dirección del evento</label>
+        <input type="text" id="pacDirEvento">
+      </div>
+      <div>
+        <label>Dirección de destino</label>
+        <input type="text" id="pacDirDestino">
+      </div>
+      <div>
+        <label>Comuna</label>
+        <input type="text" id="pacComuna">
+      </div>
+    </div>
+  </section>
+
+  <!-- ANTECEDENTES -->
+  <section class="card">
+    <h2>Antecedentes</h2>
+    <div class="row">
+      <label>Antecedentes mórbidos</label>
+      <textarea id="antMorbid"></textarea>
+    </div>
+    <div class="row">
+      <label>Antecedentes quirúrgicos</label>
+      <textarea id="antQuir"></textarea>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Alergias</label>
+        <div class="inline">
+          <label><input type="radio" name="alergias" value="No" checked> No</label>
+          <label><input type="radio" name="alergias" value="Sí"> Sí</label>
+        </div>
+        <textarea id="alergiasDetalle" placeholder="Detalle si corresponde"></textarea>
+      </div>
+      <div>
+        <label>Uso de medicamentos</label>
+        <div class="inline">
+          <label><input type="radio" name="meds" value="No" checked> No</label>
+          <label><input type="radio" name="meds" value="Sí"> Sí</label>
+        </div>
+        <textarea id="medsDetalle" placeholder="Detalle si corresponde"></textarea>
+      </div>
+      <div>
+        <label>Aliento etílico</label>
+        <div class="inline">
+          <label><input type="radio" name="oh" value="No" checked> No</label>
+          <label><input type="radio" name="oh" value="Sí"> Sí</label>
+        </div>
+        <textarea id="ohDetalle" placeholder="Detalle si corresponde"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOTIVO / HISTORIA -->
+  <section class="card">
+    <h2>Motivo de atención e historia clínica</h2>
+    <textarea id="historiaClinica"></textarea>
+  </section>
+
+  <!-- GLASGOW -->
+  <section class="card">
+    <h2>Glasgow</h2>
+    <div class="grid">
+      <div>
+        <label>Ocular</label>
+        <select id="gOcular">
+          <option value="">Seleccione</option>
+          <option value="4">4 - Espontánea</option>
+          <option value="3">3 - A la voz</option>
+          <option value="2">2 - Al dolor</option>
+          <option value="1">1 - No responde</option>
+        </select>
+      </div>
+      <div>
+        <label>Verbal</label>
+        <select id="gVerbal">
+          <option value="">Seleccione</option>
+          <option value="5">5 - Orientado</option>
+          <option value="4">4 - Confuso</option>
+          <option value="3">3 - Palabras inapropiadas</option>
+          <option value="2">2 - Sonidos incomprensibles</option>
+          <option value="1">1 - No responde</option>
+        </select>
+      </div>
+      <div>
+        <label>Motora</label>
+        <select id="gMotora">
+          <option value="">Seleccione</option>
+          <option value="6">6 - Obedece órdenes</option>
+          <option value="5">5 - Localiza dolor</option>
+          <option value="4">4 - Retirada</option>
+          <option value="3">3 - Flexión anormal</option>
+          <option value="2">2 - Extensión</option>
+          <option value="1">1 - No responde</option>
+        </select>
+      </div>
+      <div>
+        <label>Total</label>
+        <input type="number" id="gTotal" readonly>
+      </div>
+    </div>
+    <div class="grid" style="margin-top:8px;">
+      <div>
+        <label>Glasgow inicial (total)</label>
+        <input type="number" id="gInicial">
+      </div>
+      <div>
+        <label>Glasgow final (total)</label>
+        <input type="number" id="gFinal">
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNOS VITALES -->
+  <section class="card">
+    <h2>
+      Signos vitales
+      <button class="btn btn-secondary btn-small" id="btnAddSV">+ Agregar control</button>
+    </h2>
+    <div class="row">
+      <table id="tablaSV">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>FC</th>
+            <th>FR</th>
+            <th>PA</th>
+            <th>PAM</th>
+            <th>T°</th>
+            <th>Sat O₂</th>
+            <th>FiO₂</th>
+            <th>HGT</th>
+            <th>Llenado cap</th>
+            <th>Glasgow</th>
+            <th>EVA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- filas dinámicas -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MEDICAMENTOS -->
+  <section class="card">
+    <h2>
+      Medicamentos
+      <button class="btn btn-secondary btn-small" id="btnAddMed">+ Agregar</button>
+    </h2>
+    <table id="tablaMed">
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Medicamento / solución</th>
+          <th>Vía</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- PROCEDIMIENTOS -->
+  <section class="card">
+    <h2>Procedimientos</h2>
+    <div class="procedimientos-list">
+      <label><input type="checkbox" id="pMonitoreo"> Monitoreo</label>
+      <label><input type="checkbox" id="pECG"> ECG</label>
+      <label><input type="checkbox" id="pCardioversion"> Cardioversión</label>
+      <label><input type="checkbox" id="pDesfibrilacion"> Desfibrilación</label>
+      <label><input type="checkbox" id="pMarcapasos"> Marcapasos</label>
+      <label><input type="checkbox" id="pBIC"> BIC</label>
+      <label><input type="checkbox" id="pViaVenosa"> Vía venosa</label>
+      <label><input type="checkbox" id="pViaOsea"> Vía ósea</label>
+      <label><input type="checkbox" id="pSNG"> SNG</label>
+      <label><input type="checkbox" id="pMascarilla"> Mascarilla</label>
+      <label><input type="checkbox" id="pIOT"> IOT</label>
+      <label><input type="checkbox" id="pVMI"> VMI</label>
+      <label><input type="checkbox" id="pFoley"> Foley</label>
+      <label><input type="checkbox" id="pCVC"> CVC</label>
+    </div>
+  </section>
+
+  <!-- PERSONAL -->
+  <section class="card">
+    <h2>Personal a cargo</h2>
+    <div class="grid">
+      <div>
+        <label>Médico</label>
+        <input type="text" id="perMedico">
+      </div>
+      <div>
+        <label>Enfermero</label>
+        <input type="text" id="perEnfermero">
+      </div>
+      <div>
+        <label>TENS</label>
+        <input type="text" id="perTens">
+      </div>
+      <div>
+        <label>Conductor</label>
+        <input type="text" id="perConductor">
+      </div>
+    </div>
+  </section>
+
+  <!-- RECEPCIÓN -->
+  <section class="card">
+    <h2>Recepción en Clínica</h2>
+    <div class="row">
+      <label>Nombre de quien recibe</label>
+      <input type="text" id="recibeNombre">
+    </div>
+  </section>
+</main>
+
+<button class="fab" id="btnPDF">Generar PDF</button>
+<div class="status" id="statusMsg">PDF generado</div>
+
+<script>
+  // Manejo de chips de complejidad
+  document.querySelectorAll('#complejidadChips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#complejidadChips .chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      document.getElementById('complejidad').value = chip.dataset.value;
+    });
+  });
+
+  // Glasgow: cálculo automático
+  function calcGlasgow() {
+    const o = parseInt(document.getElementById('gOcular').value || 0);
+    const v = parseInt(document.getElementById('gVerbal').value || 0);
+    const m = parseInt(document.getElementById('gMotora').value || 0);
+    const total = (o + v + m) || '';
+    document.getElementById('gTotal').value = total;
+  }
+
+  ['gOcular','gVerbal','gMotora'].forEach(id => {
+    document.getElementById(id).addEventListener('change', calcGlasgow);
+  });
+
+  // Signos vitales: agregar fila
+  const tablaSVBody = document.querySelector('#tablaSV tbody');
+  document.getElementById('btnAddSV').addEventListener('click', () => {
+    const tr = document.createElement('tr');
+    const cols = ['hora','fc','fr','pa','pam','temp','sat','fio2','hgt','llenado','glasgow','eva'];
+    cols.forEach((c, idx) => {
+      const td = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = (idx === 0) ? 'time' : 'text';
+      input.style.width = '100%';
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    tablaSVBody.appendChild(tr);
+  });
+
+  // Medicamentos: agregar fila
+  const tablaMedBody = document.querySelector('#tablaMed tbody');
+  document.getElementById('btnAddMed').addEventListener('click', () => {
+    const tr = document.createElement('tr');
+    ['time','text','text'].forEach(type => {
+      const td = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = type;
+      input.style.width = '100%';
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    tablaMedBody.appendChild(tr);
+  });
+
+  // Armar objeto con todos los datos
+  function gatherData() {
+    // Signos vitales
+    const sv = [];
+    document.querySelectorAll('#tablaSV tbody tr').forEach(tr => {
+      const tds = tr.querySelectorAll('td input');
+      sv.push({
+        hora: tds[0].value,
+        fc: tds[1].value,
+        fr: tds[2].value,
+        pa: tds[3].value,
+        pam: tds[4].value,
+        temp: tds[5].value,
+        satO2: tds[6].value,
+        fio2: tds[7].value,
+        hgt: tds[8].value,
+        llenadoCapilar: tds[9].value,
+        glasgow: tds[10].value,
+        eva: tds[11].value
+      });
+    });
+
+    // Medicamentos
+    const meds = [];
+    document.querySelectorAll('#tablaMed tbody tr').forEach(tr => {
+      const tds = tr.querySelectorAll('td input');
+      meds.push({
+        hora: tds[0].value,
+        medicamento: tds[1].value,
+        via: tds[2].value
+      });
+    });
+
+    // Radios
+    const rAlergias = document.querySelector('input[name="alergias"]:checked')?.value || 'No';
+    const rMeds = document.querySelector('input[name="meds"]:checked')?.value || 'No';
+    const rOH = document.querySelector('input[name="oh"]:checked')?.value || 'No';
+
+    return {
+      evento: {
+        fecha: document.getElementById('fecha').value,
+        fichaClinica: document.getElementById('fichaClinica').value,
+        movil: document.getElementById('movil').value,
+        complejidad: document.getElementById('complejidad').value,
+        claveActivacion: document.getElementById('claveActivacion').value,
+        lugarEvento: document.getElementById('lugarEvento').value
+      },
+      paciente: {
+        nombre: document.getElementById('pacNombre').value,
+        rut: document.getElementById('pacRut').value,
+        edad: document.getElementById('pacEdad').value,
+        sexo: document.getElementById('pacSexo').value,
+        prevision: document.getElementById('pacPrevision').value,
+        telefono: document.getElementById('pacTelefono').value,
+        direccionEvento: document.getElementById('pacDirEvento').value,
+        direccionDestino: document.getElementById('pacDirDestino').value,
+        comuna: document.getElementById('pacComuna').value
+      },
+      antecedentes: {
+        morbid: document.getElementById('antMorbid').value,
+        quirurgicos: document.getElementById('antQuir').value,
+        alergiasTiene: rAlergias,
+        alergiasDetalle: document.getElementById('alergiasDetalle').value,
+        medicamentosTiene: rMeds,
+        medicamentosDetalle: document.getElementById('medsDetalle').value,
+        alientoEtilicoTiene: rOH,
+        alientoEtilicoDetalle: document.getElementById('ohDetalle').value
+      },
+      historiaClinica: document.getElementById('historiaClinica').value,
+      glasgowInicial: {
+        total: document.getElementById('gInicial').value
+      },
+      glasgowFinal: {
+        total: document.getElementById('gFinal').value
+      },
+      glasgowActual: {
+        ocular: document.getElementById('gOcular').value,
+        verbal: document.getElementById('gVerbal').value,
+        motora: document.getElementById('gMotora').value,
+        total: document.getElementById('gTotal').value
+      },
+      signosVitales: sv,
+      medicamentos: meds,
+      procedimientos: {
+        monitoreo: document.getElementById('pMonitoreo').checked,
+        ecg: document.getElementById('pECG').checked,
+        cardioversion: document.getElementById('pCardioversion').checked,
+        desfibrilacion: document.getElementById('pDesfibrilacion').checked,
+        marcapasos: document.getElementById('pMarcapasos').checked,
+        bic: document.getElementById('pBIC').checked,
+        viaVenosa: document.getElementById('pViaVenosa').checked,
+        viaOsea: document.getElementById('pViaOsea').checked,
+        sng: document.getElementById('pSNG').checked,
+        mascarilla: document.getElementById('pMascarilla').checked,
+        iot: document.getElementById('pIOT').checked,
+        vmi: document.getElementById('pVMI').checked,
+        foley: document.getElementById('pFoley').checked,
+        cvc: document.getElementById('pCVC').checked
+      },
+      personal: {
+        medico: document.getElementById('perMedico').value,
+        enfermero: document.getElementById('perEnfermero').value,
+        tens: document.getElementById('perTens').value,
+        conductor: document.getElementById('perConductor').value
+      },
+      recepcion: {
+        nombreQuienRecibe: document.getElementById('recibeNombre').value
+      }
+    };
+  }
+
+  // Generar PDF (layout básico, luego se puede afinar para parecerse 100% al papel)
+  document.getElementById('btnPDF').addEventListener('click', () => {
+    const data = gatherData();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    let y = 10;
+
+    // Encabezado
+    doc.setFontSize(14);
+    doc.text('Unidad de Rescate - Clínica Universidad de los Andes', 10, y);
+    y += 6;
+    doc.setFontSize(11);
+    doc.text('Registro de Atención Prehospitalaria', 10, y);
+    y += 8;
+
+    doc.setLineWidth(0.2);
+    doc.line(10, y, 200, y);
+    y += 4;
+
+    doc.setFontSize(9);
+
+    // Datos evento
+    doc.text(`Fecha: ${data.evento.fecha || ''}`, 10, y);
+    doc.text(`Ficha clínica: ${data.evento.fichaClinica || ''}`, 80, y);
+    doc.text(`Móvil: ${data.evento.movil || ''}`, 150, y);
+    y += 5;
+    doc.text(`Complejidad: ${data.evento.complejidad || ''}`, 10, y);
+    doc.text(`Clave de activación: ${data.evento.claveActivacion || ''}`, 80, y);
+    y += 5;
+    doc.text(`Lugar del evento: ${data.evento.lugarEvento || ''}`, 10, y);
+    y += 7;
+
+    // Datos paciente
+    doc.text('Datos del paciente', 10, y);
+    y += 4;
+    doc.text(`Nombre: ${data.paciente.nombre || ''}`, 10, y);
+    doc.text(`RUT: ${data.paciente.rut || ''}`, 110, y);
+    y += 5;
+    doc.text(`Edad: ${data.paciente.edad || ''}`, 10, y);
+    doc.text(`Sexo: ${data.paciente.sexo || ''}`, 60, y);
+    doc.text(`Previsión: ${data.paciente.prevision || ''}`, 110, y);
+    y += 5;
+    doc.text(`Teléfono: ${data.paciente.telefono || ''}`, 10, y);
+    y += 5;
+    doc.text(`Dirección evento: ${data.paciente.direccionEvento || ''}`, 10, y);
+    y += 5;
+    doc.text(`Dirección destino: ${data.paciente.direccionDestino || ''}`, 10, y);
+    y += 5;
+    doc.text(`Comuna: ${data.paciente.comuna || ''}`, 10, y);
+    y += 7;
+
+    // Antecedentes
+    doc.text('Antecedentes', 10, y);
+    y += 4;
+    doc.text(`Mórbidos: ${data.antecedentes.morbid || ''}`.substring(0, 110), 10, y);
+    y += 4;
+    doc.text(`Quirúrgicos: ${data.antecedentes.quirurgicos || ''}`.substring(0, 110), 10, y);
+    y += 4;
+    doc.text(`Alergias: ${data.antecedentes.alergiasTiene} ${data.antecedentes.alergiasDetalle || ''}`.substring(0, 110), 10, y);
+    y += 4;
+    doc.text(`Medicamentos: ${data.antecedentes.medicamentosTiene} ${data.antecedentes.medicamentosDetalle || ''}`.substring(0, 110), 10, y);
+    y += 4;
+    doc.text(`Aliento etílico: ${data.antecedentes.alientoEtilicoTiene} ${data.antecedentes.alientoEtilicoDetalle || ''}`.substring(0, 110), 10, y);
+    y += 7;
+
+    // Historia clínica
+    doc.text('Motivo de atención e historia clínica', 10, y);
+    y += 4;
+    const histLines = doc.splitTextToSize(data.historiaClinica || '', 180);
+    doc.text(histLines, 10, y);
+    y += histLines.length * 4 + 3;
+
+    // Glasgow
+    doc.text(`Glasgow actual (O/V/M/Total): ${data.glasgowActual.ocular || '-'} / ${data.glasgowActual.verbal || '-'} / ${data.glasgowActual.motora || '-'} / ${data.glasgowActual.total || '-'}`, 10, y);
+    y += 4;
+    doc.text(`Glasgow inicial: ${data.glasgowInicial.total || '-'}`, 10, y);
+    doc.text(`Glasgow final: ${data.glasgowFinal.total || '-'}`, 80, y);
+    y += 7;
+
+    // Signos vitales (solo primeras filas por tema de espacio)
+    doc.text('Signos vitales (resumen)', 10, y);
+    y += 4;
+    let countSV = 0;
+    data.signosVitales.forEach(row => {
+      if (countSV >= 6) return;
+      const line = `Hora ${row.hora || ''} | FC ${row.fc || ''} | FR ${row.fr || ''} | PA ${row.pa || ''} | Sat ${row.satO2 || ''} | EVA ${row.eva || ''}`;
+      doc.text(line.substring(0, 180), 10, y);
+      y += 4;
+      countSV++;
+    });
+    y += 3;
+
+    // Medicamentos
+    doc.text('Medicamentos', 10, y);
+    y += 4;
+    let countMed = 0;
+    data.medicamentos.forEach(m => {
+      if (countMed >= 6) return;
+      const line = `${m.hora || ''} - ${m.medicamento || ''} (${m.via || ''})`;
+      doc.text(line.substring(0, 180), 10, y);
+      y += 4;
+      countMed++;
+    });
+    y += 4;
+
+    // Procedimientos
+    doc.text('Procedimientos realizados', 10, y);
+    y += 4;
+    const procsTxt = Object.entries(data.procedimientos)
+      .filter(([k,v]) => v)
+      .map(([k]) => k)
+      .join(', ') || 'Sin registros';
+    doc.text(procsTxt.substring(0, 180), 10, y);
+    y += 7;
+
+    // Personal / recepción
+    doc.text('Personal a cargo', 10, y);
+    y += 4;
+    doc.text(`Médico: ${data.personal.medico || ''}`, 10, y);
+    y += 4;
+    doc.text(`Enfermero: ${data.personal.enfermero || ''}`, 10, y);
+    y += 4;
+    doc.text(`TENS: ${data.personal.tens || ''}`, 10, y);
+    y += 4;
+    doc.text(`Conductor: ${data.personal.conductor || ''}`, 10, y);
+    y += 6;
+    doc.text(`Recepción en Clínica (nombre): ${data.recepcion.nombreQuienRecibe || ''}`, 10, y);
+
+    const nombrePaciente = data.paciente.nombre || 'paciente';
+    doc.save(`registro_rescate_${nombrePaciente}.pdf`);
+
+    const status = document.getElementById('statusMsg');
+    status.textContent = 'PDF generado';
+    status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), 2000);
+  });
+</script>
+
+</body>
+</html>
