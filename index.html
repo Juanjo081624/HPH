@@ -239,6 +239,38 @@
 </header>
 
 <main>
+
+  <!-- HORARIOS QTR -->
+  <section class="card">
+    <h2>Horarios (QTR)</h2>
+    <div class="grid">
+      <div>
+        <label>QTR1</label>
+        <input type="time" id="qtr1">
+      </div>
+      <div>
+        <label>QTR2</label>
+        <input type="time" id="qtr2">
+      </div>
+      <div>
+        <label>QTR3</label>
+        <input type="time" id="qtr3">
+      </div>
+      <div>
+        <label>QTR4</label>
+        <input type="time" id="qtr4">
+      </div>
+      <div>
+        <label>QTR5</label>
+        <input type="time" id="qtr5">
+      </div>
+      <div>
+        <label>QTR6</label>
+        <input type="time" id="qtr6">
+      </div>
+    </div>
+  </section>
+
   <!-- DATOS DEL EVENTO -->
   <section class="card">
     <h2>Datos del evento</h2>
@@ -616,6 +648,14 @@
     const rOH = document.querySelector('input[name="oh"]:checked')?.value || 'No';
 
     return {
+      horarios: {
+        qtr1: document.getElementById('qtr1').value,
+        qtr2: document.getElementById('qtr2').value,
+        qtr3: document.getElementById('qtr3').value,
+        qtr4: document.getElementById('qtr4').value,
+        qtr5: document.getElementById('qtr5').value,
+        qtr6: document.getElementById('qtr6').value
+      },
       evento: {
         fecha: document.getElementById('fecha').value,
         fichaClinica: document.getElementById('fichaClinica').value,
@@ -704,7 +744,25 @@
 
     doc.setFontSize(9);
 
+    // Horarios QTR
+    doc.text('Horarios (QTR)', 10, y);
+    y += 4;
+    doc.text(
+      `QTR1: ${data.horarios.qtr1 || '-'}  |  QTR2: ${data.horarios.qtr2 || '-'}  |  QTR3: ${data.horarios.qtr3 || '-'}`,
+      10,
+      y
+    );
+    y += 4;
+    doc.text(
+      `QTR4: ${data.horarios.qtr4 || '-'}  |  QTR5: ${data.horarios.qtr5 || '-'}  |  QTR6: ${data.horarios.qtr6 || '-'}`,
+      10,
+      y
+    );
+    y += 7;
+
     // Datos evento
+    doc.text('Datos del evento', 10, y);
+    y += 4;
     doc.text(`Fecha: ${data.evento.fecha || ''}`, 10, y);
     doc.text(`Ficha clínica: ${data.evento.fichaClinica || ''}`, 80, y);
     doc.text(`Móvil: ${data.evento.movil || ''}`, 150, y);
